@@ -1,0 +1,104 @@
+<% include include/header.ejs %>
+<% include include/head.ejs %>
+<div class="container" ng-controller="PlayerController as player">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="col-sm-2">
+            <img height="150" ng-src="{{ player.current.album.images[1].url }}">
+          </div>
+          <div class="col-sm-7">
+            <address>
+              <div title="{{ player.current.name }}"><strong>{{ player.current.name }}</strong></div>
+              <div title="{{ player.current.album.name }}"><i>{{ player.current.album.name }}</i></div>
+              <div title="{{ artist.name }}" ng-repeat="artist in player.current.artists">{{ artist.name }}</div>
+            </address>
+          </div>
+          <div class="col-sm-3 text-right">
+            <span>
+            <button class="btn btn-default"><i class="fa fa-2x fa-fast-backward"></i></button>
+            <button class="btn btn-default" ng-hide="player.playing" ng-click="player.play()">
+              <i class="fa fa-2x fa-play"></i>
+            </button>
+            <button class="btn btn-default" ng-show="player.playing" ng-click="player.pause()">
+              <i class="fa fa-2x fa-pause"></i>
+            </button>
+            <button class="btn btn-default"><i class="fa fa-2x fa-fast-forward"></i></button>
+          </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-9" ng-controller="SearchController as search">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <strong>Search Spotify</strong>
+        </div>
+        <div class="panel-body">
+          <form role="search">
+            <div class="form-group">
+              <input type="text" class="form-control col-sm-6" placeholder="Search" ng-model="search.query" ng-change="search.onChange()">
+            </div>
+          </form>
+        </div>
+        <table class="table table-hover">
+          <tr ng-show="search.tracks.length > 0">
+            <th class="col-sm-4">Track</th>
+            <th class="col-sm-2">Artist</th>
+            <th class="col-sm-1">Time</th>
+            <th>Album</th>
+            <th class="col-sm-1">&nbsp;</th>
+          </tr>
+          <tr ng-repeat="track in search.tracks">
+            <td>
+              <span title="{{ track.name }}">{{ track.name | chop:32 }}</span>
+            </td>
+            <td>
+              <div ng-repeat="artist in track.artists">
+                <a href="{{ artist.href }}" title="{{ artist.name }}">{{ artist.name | chop:12 }}</a>
+              </div>
+            </td>
+            <td>{{ track.duration_ms | duration }}</td>
+            <td>
+              <a href="{{ track.album.href }}" title="{{ track.album.name }}">{{ track.album.name | chop:32 }}</a>
+            </td>
+            <td>
+              <a href="#" title="Play Now" ng-click="player.play_now(track)"><i class="fa fa-play"></i></a>
+              <a href="#" title="Play Next" ng-click="player.play_next(track)"><i class="fa fa-indent"></i></a>
+              <a href="#" title="Add to Queue" ng-click="player.enqueue(track)"><i class="fa fa-align-justify"></i></a>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <strong>Queue</strong>
+        </div>
+        <table class="table table-hover table-condensed">
+          <tr ng-repeat="track in player.queue track by $index">
+            <td>
+              <span title="{{ track.name }}">{{ $index + 1 }}. {{ track.name | chop:24 }}</span>
+              <a href="#" class="pull-right" ng-click=player.remove($index)><i class="fa fa-remove"></i></a>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <strong>Outputs</strong>
+        </div>
+        <table class="table table-hover">
+          <tr>
+            <td>Nothing :(</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<% include include/foot.ejs %>

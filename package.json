@@ -6,13 +6,18 @@
   "dependencies": {
     "airtunes": "0.1.6",
     "body-parser": "1.6.x",
+    "ejs": "1.0.0",
     "express" : "4.x",
     "libspotify": "https://github.com/jmanero/node-libspotify/archive/v0.2.2-jmanero2.tar.gz",
     "mdns": "2.2.0",
     "morgan" : "1.0.1",
+    "qs": "2.2.x",
     "redis": "0.12.x",
+    "serve-favicon": "2.1.x",
+    "serve-static": "1.5.x",
     "socket.io": "1.0.x",
     "speaker": "0.1.0",
+    "spotify-web-api-node": "1.0.x",
     "winston": "0.7.x"
   },
   "repository" : "nowhere",
