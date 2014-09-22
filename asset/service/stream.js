@@ -23,11 +23,11 @@
       });
 
       this.play = function() {
-        $http.put('/play');
+        $http.put(serviceHost() + '/play');
       };
 
       this.pause = function() {
-        $http.put('/pause');
+        $http.put(serviceHost() + '/pause');
       };
 
       this.play_now = function(track) {

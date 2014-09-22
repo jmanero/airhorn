@@ -27,7 +27,9 @@ app.use(Morgan()); // Logging
 app.use(Favicon(Path.resolve(__dirname, '../asset/favicon.png')));
 app.use('/asset', Static(Path.resolve(__dirname, '../asset')));
 app.use(BodyParser.json());
-app.use(BodyParser.urlencoded());
+app.use(BodyParser.urlencoded({
+  extended: true
+}));
 // app.use(Cookies.express());
 
 require('../lib/control/interface/ui').attach(app);

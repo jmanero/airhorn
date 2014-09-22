@@ -62,7 +62,7 @@ app.set('mixer', mixer);
 app.set('session', session);
 
 require('../lib/stream/interface/player').attach(app);
-require('../lib/stream/interface/device').attach(app);
+require('../lib/stream/interface/devices').attach(app);
 
 session.once('login', function(err) {
   if (err) throw err;
