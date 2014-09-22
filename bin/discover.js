@@ -1,3 +1,4 @@
+var CORS = require('cors');
 var Express = require('express');
 var HTTP = require('http');
 var MDNS = require('mdns');
@@ -6,35 +7,25 @@ var Redis = require('redis');
 var SocketIO = require('socket.io');
 var Static = require('serve-static');
 
-var app = Express();
-var browser = MDNS.createBrowser(MDNS.tcp('raop'));
 var db = Redis.createClient();
+
+/**
+ * Service Interface
+ */
+var app = Express();
 var server = HTTP.createServer(app);
-var io = SocketIO(server).of('device');
+var io = SocketIO(server).of('/device');
 
-var M_KEY = /^DEVICE::(.*)$/;
-function keyMap(key) {
-  var parts = key.match(M_KEY);
-
-  if(!parts) return null;
-  return parts[1];
-}
-
-function deviceMap(device) {
-  return ({
-    name: device.name,
-    host: device.host,
-    port: device.port,
-    model: device.txtRecord.am,
-    fqdn: device.fullname,
-    addresses: device.addresses
-  });
-}
+app.use(CORS());
 
 app.get('/device', function(req, res, next) {
   db.keys('DEVICE::*', function(err, keys) {
     if (err) return next(err);
-    res.json(keys.map(keyMap));
+
+    db.mget(keys, function(err, devices) {
+      if (err) return next(err);
+      res.json(devices.map(JSON.parse));
+    });
   });
 });
 
@@ -46,16 +37,43 @@ app.get('/device/:id', function(req, res, next) {
   });
 });
 
-// MDNS browser events
+/**
+ * MDNS browser events
+ */
+var browser = MDNS.createBrowser(MDNS.tcp('raop'));
 browser.on('serviceUp', function(device) {
+  device = deviceMap(device);
+
   io.emit('up', device);
-  db.set('DEVICE::' + device.name, JSON.stringify(deviceMap(device), null, 2));
+  db.set('DEVICE::' + device.id, JSON.stringify(device, null, 2));
+  console.log('Adding device ' + device.id);
 });
 
 browser.on('serviceDown', function(device) {
-  io.emit('down', device);
+  io.emit('down', device.name);
   db.del('DEVICE::' + device.name);
+  console.log('Removing device ' + device.name);
 });
+
+var M_KEY = /^DEVICE::(.*)$/;
+function keyMap(key) {
+  var parts = key.match(M_KEY);
+
+  if(!parts) return null;
+  return parts[1];
+}
+
+function deviceMap(device) {
+  return ({
+    id: device.name,
+    name: device.name.split('@')[1],
+    host: device.host,
+    port: device.port,
+    model: device.txtRecord.am,
+    fqdn: device.fullname,
+    addresses: device.addresses
+  });
+}
 
 // Startup
 db.on('ready', function() {

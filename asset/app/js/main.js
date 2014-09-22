@@ -1,5 +1,5 @@
 (function() {
-  var app = angular.module('airhornPlayer', []);
+  var app = angular.module('airhornPlayer', ['AirhornStream', 'AirhornDiscovery']);
 
   app.filter('chop', function() {
     return function(input, length) {
@@ -28,45 +28,6 @@
     };
   });
 
-  app.controller('PlayerController', ['$http',
-    function($http) {
-      var player = this;
-
-      this.playing = false;
-      this.current = null;
-      this.queue = [];
-
-      this.play = function() {
-        this.playing = true;
-      };
-
-      this.pause = function() {
-        this.playing = false;
-      };
-
-      this.play_now = function(track) {
-        console.log('Play ' + track.name + '(' + track.uri + ') Now');
-
-        this.current = track;
-        this.play();
-      };
-
-      this.play_next = function(track) {
-        console.log('Play ' + track.name + '(' + track.uri + ') Next');
-        this.queue.unshift(track);
-      };
-
-      this.enqueue = function(track) {
-        console.log('Enqueue ' + track.name + '(' + track.uri + ')');
-        this.queue.push(track);
-      };
-
-      this.remove = function(n) {
-        this.queue.splice(n, 1);
-      };
-    }
-  ]);
-
   app.controller('SearchController', ['$http', '$location',
     function($http, $location) {
       var controller = this;
@@ -82,11 +43,10 @@
       };
 
       this.doSearch = function() {
-        console.log(this.query);
-        // $location.hash('/' + this.query);
+        console.log('SEARCH Sending request for `' + this.query + '`');
 
         $http.get('/search?query=' + this.query).success(function(data) {
-          console.log(data);
+          console.log('SEARCH Received ' + data.length + ' results');
           controller.tracks = data;
         });
       };

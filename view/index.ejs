@@ -88,13 +88,13 @@
           </tr>
         </table>
       </div>
-      <div class="panel panel-default">
+      <div class="panel panel-default" ng-controller="DiscoveryController as discover">
         <div class="panel-heading">
           <strong>Outputs</strong>
         </div>
         <table class="table table-hover">
-          <tr>
-            <td>Nothing :(</td>
+          <tr ng-repeat="device in discover.listDevices()">
+            <td>{{ device.name }}</td>
           </tr>
         </table>
       </div>

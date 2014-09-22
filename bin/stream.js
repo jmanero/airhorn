@@ -1,33 +1,38 @@
+/**
+ * AirHorn
+ * Stream Service
+ *
+ * Use libspotify to fetch audio streams, crossfade tracks,
+ * and push the output stream to AirPlay devices
+ */
+
+// Stream Modules
 var AirTunes = require('airtunes');
-var Interface = require('../lib/stream/interface');
 var Mixer = require('../lib/stream/mixer');
 var Path = require('path');
-// var Speaker = require('speaker');
 var Spotify = require('libspotify');
 
-var username = '1216763447';
-var password = '%APxc47v7+V8}h33W6m$CFVN(FXr.?Yc';
+// API Modules
+var BodyParser = require('body-parser');
+var CORS = require('cors');
+var Express = require('express');
+var HTTP = require('http');
+var Path = require('path');
+var SocketIO = require('socket.io');
+var Static = require('serve-static');
 
-// Create an output device and mixer
-// var speaker = new Speaker();
+// Config
+var Config = require('../config.js');
 
-// 'spotify:track:2lfmRyTLtsTCkLwMQcFSQk',
-// 'spotify:track:0s7PXyp4jKYGtMSiqTskiu',
-// 'spotify:track:7hN5TKSdRb56uytwIpcUES',
-// 'spotify:track:5U8hKxSaDXB8cVeLFQjvwx',
-// 'spotify:track:4ImL3v98u2BLkwnyQDjfRm',
-// 'spotify:track:0adTN3vBO3pimO3yfxm9vg',
-
-// Create a Spotify session and instantiate its player
+// Open a Spotify session
 var session = this._session = new Spotify.Session({
   applicationKey: Path.resolve(__dirname, '../spotify_appkey.key')
 });
 
-// Track crossfade mixer
+// Set up Crossfade Controller
 var mixer = new Mixer(session, {
   delay: 128 // Default Crossfade overlap
 });
-// mixer.pipe(speaker);
 mixer.pipe(AirTunes);
 
 // Shutdown controller
@@ -38,20 +43,31 @@ function shutdown(sig) {
 
   if (mixer._player) mixer._player.stop();
   session.logout();
-
-  control.close();
   session.close();
 }
-
 process.on('SIGINT', shutdown.bind(null, 'SIGINT'));
 process.on('SIGTERM', shutdown.bind(null, 'SIGTERM'));
 
-// Create control interface
-var interface = Interface.create(mixer);
+// Create Control API
+var app = Express();
+var server = HTTP.createServer(app);
+var io = SocketIO(server);
+
+// API Middleware
+app.use(CORS());
+app.use(BodyParser.json());
+
+app.set('io', io);
+app.set('mixer', mixer);
+app.set('session', session);
+
+require('../lib/stream/interface/player').attach(app);
+require('../lib/stream/interface/device').attach(app);
+
 session.once('login', function(err) {
   if (err) throw err;
-  interface.listen(9081);
+  server.listen(9081);
 });
 
 // Login to Spotify
-session.login(username, password);
+session.login(Config.username, Config.password);

@@ -14,6 +14,7 @@ var Static = require('serve-static');
 // Web Server
 var app = Express();
 var server = HTTP.createServer(app);
+var io = SocketIO(server);
 
 // Expose helpers in templates
 app.locals.Path = require('path');
@@ -24,7 +25,7 @@ app.set('views', Path.resolve(__dirname, '../view'));
 // Load Middleware
 app.use(Morgan()); // Logging
 app.use(Favicon(Path.resolve(__dirname, '../asset/favicon.png')));
-app.use('/asset', Static(Path.resolve(__dirname, '../asset/control')));
+app.use('/asset', Static(Path.resolve(__dirname, '../asset')));
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded());
 // app.use(Cookies.express());

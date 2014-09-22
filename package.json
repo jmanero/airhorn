@@ -6,6 +6,7 @@
   "dependencies": {
     "airtunes": "0.1.6",
     "body-parser": "1.6.x",
+    "cors": "2.4.x",
     "ejs": "1.0.0",
     "express" : "4.x",
     "libspotify": "https://github.com/jmanero/node-libspotify/archive/v0.2.2-jmanero2.tar.gz",
